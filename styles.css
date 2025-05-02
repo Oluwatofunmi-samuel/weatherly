@@ -21,7 +21,6 @@ body {
     color: #ffffff !important;
 }
 
-/* Make sure text is readable on night background */
 .bg-night .text-gray-800,
 .bg-night .text-gray-500,
 .bg-night .text-gray-700 {
