@@ -28,19 +28,16 @@ document.addEventListener('DOMContentLoaded', function() {
     function init() {
         const urlParams = new URLSearchParams(window.location.search);
         
-        // Load favorites if any
         if (favorites.length > 0) {
             renderFavorites();
             favoritesSection.classList.remove('hidden');
         }
 
-        // Check for URL parameter first
         if (urlParams.has('location')) {
             const locationParam = urlParams.get('location');
             searchInput.value = locationParam;
             fetchWeather(locationParam);
         } else {
-            // Try geolocation if no URL parameter
             getLocation();
         }
         
@@ -78,17 +75,20 @@ document.addEventListener('DOMContentLoaded', function() {
             error.classList.add('hidden');
             searchSuggestions.classList.add('hidden');
 
-            // Fetch current weather
-            const currentResponse = await fetch(`${BASE_URL}/current.json?key=${API_KEY}&q=${location}`);
-            const currentData = await currentResponse.json();
-            if (currentData.error) throw new Error(currentData.error.message);
+            const [currentResponse, forecastResponse] = await Promise.all([
+                fetch(`${BASE_URL}/current.json?key=${API_KEY}&q=${location}`),
+                fetch(`${BASE_URL}/forecast.json?key=${API_KEY}&q=${location}&days=5`)
+            ]);
 
-            // Fetch forecast
-            const forecastResponse = await fetch(`${BASE_URL}/forecast.json?key=${API_KEY}&q=${location}&days=5`);
-            const forecastData = await forecastResponse.json();
-            if (forecastData.error) throw new Error(forecastData.error.message);
+            const [currentData, forecastData] = await Promise.all([
+                currentResponse.json(),
+                forecastResponse.json()
+            ]);
 
-            // Update UI
+            if (currentData.error || forecastData.error) {
+                throw new Error(currentData.error?.message || forecastData.error?.message);
+            }
+
             renderWeather(currentData, forecastData);
             currentLocation = location;
             loading.classList.add('hidden');
@@ -105,7 +105,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderWeather(currentData, forecastData) {
         const { location, current } = currentData;
         
-        // Clear existing interval
         if (weatherUpdateInterval) clearInterval(weatherUpdateInterval);
         
         // Update current weather
@@ -115,57 +114,72 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('humidity').textContent = `${current.humidity}%`;
         document.getElementById('wind-speed').textContent = `${current.wind_kph} km/h`;
         document.getElementById('visibility').textContent = `${current.vis_km} km`;
-        document.getElementById('pressure').textContent = `${current.pressure_mb} mb`;
+        document.getElementById('pressure').textContent = `${current.pressure_mb} hPa`;
         document.getElementById('current-condition').textContent = current.condition.text;
         
-        // Update icons and time
         document.getElementById('weather-icon').innerHTML = `<i class="ph ${getWeatherIcon(current.condition.code, current.is_day)}"></i>`;
         updateLocalTime(location);
         
-        // Set background updates
         weatherUpdateInterval = setInterval(() => {
             const isDay = new Date().getHours() >= 6 && new Date().getHours() < 18;
             updateBackground(current.condition.code, isDay);
         }, 3600000);
         
-        // Render forecast
-        renderForecast(forecastData.forecast.forecastday);
+        renderForecast(forecastData.forecast.forecastday, location.tz_id);
         addToHistory(location.name);
     }
 
     function updateLocalTime(location) {
         const updateTime = () => {
             const now = new Date();
-            const timeString = now.toLocaleTimeString('en-US', { 
+            const options = { 
                 timeZone: location.tz_id,
-                hour: '2-digit', 
+                hour: '2-digit',
                 minute: '2-digit',
                 hour12: false
-            });
-            const dateString = now.toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric',
-                timeZone: location.tz_id
-            });
-            document.getElementById('current-time').textContent = timeString;
-            document.getElementById('current-date').textContent = dateString;
+            };
+            
+            document.getElementById('current-time').textContent = 
+                now.toLocaleTimeString('en-US', options);
+            
+            document.getElementById('current-date').textContent = 
+                now.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    timeZone: location.tz_id
+                });
         };
         updateTime();
         setInterval(updateTime, 60000);
     }
 
-    function renderForecast(forecastDays) {
+    function renderForecast(forecastDays, timezone) {
         forecastContainer.innerHTML = '';
+        const now = new Date();
+        
         forecastDays.forEach(day => {
             const date = new Date(day.date);
+            const isCurrentDay = date.toDateString() === 
+                now.toLocaleDateString('en-US', { timeZone: timezone });
+            
+            const currentHour = new Date().toLocaleString('en-US', {
+                hour: 'numeric',
+                hour12: false,
+                timeZone: timezone
+            });
+            
+            const isDay = isCurrentDay ? 
+                currentHour >= 6 && currentHour < 18 :
+                true;
+
             const forecastCard = document.createElement('div');
             forecastCard.className = 'forecast-card weather-card p-3 rounded-lg shadow-md flex flex-col items-center transition-all hover:shadow-lg';
             forecastCard.innerHTML = `
-                <p class="font-medium text-sm">${date.toLocaleDateString('en-US', { weekday: 'short' })}</p>
+                <p class="font-medium text-sm">${date.toLocaleDateString('en-US', { weekday: 'short', timeZone: timezone })}</p>
                 <p class="text-xs text-gray-500 mb-1">${date.getDate()}/${date.getMonth() + 1}</p>
-                <div class="text-3xl my-1"><i class="ph ${getWeatherIcon(day.day.condition.code, 1)}"></i></div>
+                <div class="text-3xl my-1"><i class="ph ${getWeatherIcon(day.day.condition.code, isDay)}"></i></div>
                 <div class="flex justify-between w-full mt-1">
                     <span class="font-bold text-sm">${Math.round(day.day.maxtemp_c)}°</span>
                     <span class="text-gray-500 text-sm">${Math.round(day.day.mintemp_c)}°</span>
@@ -175,59 +189,59 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-function getWeatherIcon(code, isDay) {
-    const iconMap = {
-        1000: isDay ? 'ph-sun' : 'ph-moon', // Clear
-        1003: isDay ? 'ph-cloud-sun' : 'ph-cloud-moon', // Partly cloudy
-        1006: 'ph-cloud', // Cloudy
-        1009: 'ph-cloud', // Overcast
-        1030: 'ph-cloud-fog', // Mist
-        1063: 'ph-cloud-drizzle', // Patchy rain
-        1066: 'ph-snowflake', // Patchy snow
-        1069: 'ph-cloud-snow', // Sleet
-        1072: 'ph-cloud-drizzle', // Freezing drizzle
-        1087: 'ph-cloud-lightning', // Thundery outbreaks
-        1114: 'ph-snowflake', // Blowing snow
-        1117: 'ph-snowflake', // Blizzard
-        1135: 'ph-cloud-fog', // Fog
-        1147: 'ph-cloud-fog', // Freezing fog
-        1150: 'ph-cloud-drizzle', // Light drizzle
-        1153: 'ph-cloud-drizzle', // Moderate drizzle
-        1168: 'ph-cloud-drizzle', // Freezing drizzle
-        1171: 'ph-cloud-drizzle', // Heavy freezing drizzle
-        1180: 'ph-cloud-rain', // Light rain
-        1183: 'ph-cloud-rain', // Moderate rain
-        1186: 'ph-cloud-rain', // Heavy rain
-        1189: 'ph-cloud-rain', // Light rain shower
-        1192: 'ph-cloud-rain', // Moderate/heavy rain shower
-        1195: 'ph-cloud-rain', // Torrential rain
-        1198: 'ph-cloud-rain', // Light freezing rain
-        1201: 'ph-cloud-rain', // Moderate/heavy freezing rain
-        1204: 'ph-cloud-snow', // Light sleet
-        1207: 'ph-cloud-snow', // Moderate/heavy sleet
-        1210: 'ph-snowflake', // Light snow
-        1213: 'ph-snowflake', // Moderate snow
-        1216: 'ph-snowflake', // Heavy snow
-        1219: 'ph-snowflake', // Light snow showers
-        1222: 'ph-snowflake', // Moderate/heavy snow showers
-        1225: 'ph-snowflake', // Blowing snow
-        1237: 'ph-circle-dashed', // Ice pellets
-        1240: 'ph-cloud-drizzle', // Light rain
-        1243: 'ph-cloud-rain', // Moderate/heavy rain
-        1246: 'ph-cloud-rain', // Torrential rain
-        1249: 'ph-cloud-snow', // Light sleet showers
-        1252: 'ph-cloud-snow', // Moderate/heavy sleet showers
-        1255: 'ph-snowflake', // Light snow showers
-        1258: 'ph-snowflake', // Moderate/heavy snow showers
-        1261: 'ph-circle-dashed', // Light ice pellets
-        1264: 'ph-circle-dashed', // Moderate/heavy ice pellets
-        1273: 'ph-cloud-lightning', // Patchy light rain w/thunder
-        1276: 'ph-cloud-lightning', // Moderate/heavy rain w/thunder
-        1279: 'ph-cloud-lightning', // Patchy light snow w/thunder
-        1282: 'ph-cloud-lightning' // Moderate/heavy snow w/thunder
-    };
-    return iconMap[code] || 'ph-question';
-        }
+    function getWeatherIcon(code, isDay) {
+        const iconMap = {
+            1000: isDay ? 'ph-sun' : 'ph-moon',
+            1003: isDay ? 'ph-cloud-sun' : 'ph-cloud-moon',
+            1006: 'ph-cloud',
+            1009: 'ph-cloud',
+            1030: 'ph-cloud-fog',
+            1063: 'ph-cloud-drizzle',
+            1066: 'ph-snowflake',
+            1069: 'ph-cloud-snow',
+            1072: 'ph-cloud-drizzle',
+            1087: 'ph-cloud-lightning',
+            1114: 'ph-snowflake',
+            1117: 'ph-snowflake',
+            1135: 'ph-cloud-fog',
+            1147: 'ph-cloud-fog',
+            1150: 'ph-cloud-drizzle',
+            1153: 'ph-cloud-drizzle',
+            1168: 'ph-cloud-drizzle',
+            1171: 'ph-cloud-drizzle',
+            1180: 'ph-cloud-rain',
+            1183: 'ph-cloud-rain',
+            1186: 'ph-cloud-rain',
+            1189: 'ph-cloud-rain',
+            1192: 'ph-cloud-rain',
+            1195: 'ph-cloud-rain',
+            1198: 'ph-cloud-rain',
+            1201: 'ph-cloud-rain',
+            1204: 'ph-cloud-snow',
+            1207: 'ph-cloud-snow',
+            1210: 'ph-snowflake',
+            1213: 'ph-snowflake',
+            1216: 'ph-snowflake',
+            1219: 'ph-snowflake',
+            1222: 'ph-snowflake',
+            1225: 'ph-snowflake',
+            1237: 'ph-circle-dashed',
+            1240: 'ph-cloud-drizzle',
+            1243: 'ph-cloud-rain',
+            1246: 'ph-cloud-rain',
+            1249: 'ph-cloud-snow',
+            1252: 'ph-cloud-snow',
+            1255: 'ph-snowflake',
+            1258: 'ph-snowflake',
+            1261: 'ph-circle-dashed',
+            1264: 'ph-circle-dashed',
+            1273: 'ph-cloud-lightning',
+            1276: 'ph-cloud-lightning',
+            1279: 'ph-cloud-lightning',
+            1282: 'ph-cloud-lightning'
+        };
+        return iconMap[code] || 'ph-question';
+    }
 
     function updateBackground(weatherCode, isDay) {
         document.body.classList.remove('bg-sunny', 'bg-rainy', 'bg-cloudy', 'bg-night');
@@ -376,4 +390,4 @@ function getWeatherIcon(code, isDay) {
         url.searchParams.set('location', location);
         navigator.clipboard.writeText(url.toString());
     }
-});
+}); 
