@@ -390,4 +390,4 @@ document.addEventListener('DOMContentLoaded', function() {
         url.searchParams.set('location', location);
         navigator.clipboard.writeText(url.toString());
     }
-}); 
+});
