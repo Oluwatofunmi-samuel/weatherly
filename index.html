@@ -10,122 +10,152 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-gray-100 min-h-screen transition-all duration-500">
-    <div class="container mx-auto px-4 py-4">
-        <!-- Header -->
-        <header class="flex justify-between items-center mb-6">
+<body class="bg-gradient-to-br from-blue-50 to-gray-100 text-gray-800 min-h-screen transition-colors duration-300">
+    <div class="container mx-auto px-4 py-4 md:py-8">
+
+        <!-- Header Section -->
+        <header class="flex justify-between items-center mb-6 md:mb-8">
             <div class="flex items-center">
-                <i class="ph ph-cloud-sun text-2xl text-blue-500 mr-2"></i>
-                <h1 class="text-xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">Weatherly</h1>
+                <i class="ph ph-cloud-sun text-2xl md:text-3xl text-blue-500 mr-2"></i>
+                <h1 class="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">Weatherly</h1>
             </div>
         </header>
 
         <!-- Search Section -->
-        <section class="mb-6 relative">
+        <section class="mb-6 md:mb-8 relative">
             <div class="flex">
                 <div class="relative flex-grow">
                     <input type="text" id="search-input" placeholder="Search for a city..." 
-                        class="w-full p-3 pr-10 rounded-l-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                        class="w-full p-3 md:p-4 pr-10 rounded-l-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm md:text-base">
                     <div id="search-suggestions" class="absolute z-10 w-full mt-1 bg-white rounded-lg shadow-lg hidden max-h-60 overflow-y-auto"></div>
                 </div>
-                <button id="search-btn" class="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-r-lg transition-colors flex items-center text-sm">
-                    <i class="ph ph-magnifying-glass"></i>
+                <button id="search-btn" class="bg-blue-500 hover:bg-blue-600 text-white p-3 md:p-4 rounded-r-lg transition-colors flex items-center text-sm md:text-base">
+                    <i class="ph ph-magnifying-glass mr-1 md:mr-2"></i> <span class="hidden md:inline">Search</span>
                 </button>
-                <button id="location-btn" class="ml-2 bg-gray-200 hover:bg-gray-300 p-3 rounded-lg transition-colors flex items-center" title="Use current location">
-                    <i class="ph ph-navigation-arrow"></i>
+                <button id="location-btn" class="ml-2 bg-gray-200 hover:bg-gray-300 p-3 md:p-4 rounded-lg transition-colors flex items-center" title="Use current location">
+                    <i class="ph ph-navigation-arrow text-sm md:text-base"></i>
                 </button>
             </div>
         </section>
 
-        <!-- Main Weather Display -->
-        <section id="weather-display" class="mb-6 hidden">
-            <div class="weather-card rounded-xl shadow-lg p-4 transition-all transform hover:scale-[1.01] relative">
-                <div class="flex justify-between items-start mb-4">
+        <!-- Weather Display -->
+        <section id="weather-display" class="mb-6 md:mb-8 hidden">
+            <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 transition-all transform hover:scale-[1.01]">
+                <div class="flex justify-between items-start mb-4 md:mb-6">
                     <div>
-                        <h2 class="text-xl font-bold flex items-center">
+                        <h2 class="text-xl md:text-2xl font-bold flex items-center">
                             <i class="ph ph-map-pin mr-2 text-blue-500"></i>
                             <span id="location-name">--</span>
                         </h2>
-                        <p id="current-date" class="text-gray-500 text-sm">--</p>
+                        <p id="current-date" class="text-gray-500 text-sm md:text-base">--</p>
                     </div>
                     <div class="text-right">
-                        <p id="current-time" class="text-lg font-medium">--:--</p>
-                        <p id="current-condition" class="text-gray-500 capitalize text-sm">--</p>
+                        <p id="current-time" class="text-lg md:text-xl font-medium">--:--</p>
+                        <p id="current-condition" class="text-gray-500 capitalize text-sm md:text-base">--</p>
                     </div>
                 </div>
 
-                <div class="flex flex-col items-center justify-between">
-                    <div class="flex items-center mb-4 w-full justify-between">
-                        <div class="flex items-center">
-                            <div id="weather-icon" class="text-5xl mr-3">--</div>
-                            <div>
-                                <p class="text-4xl font-bold" id="current-temp">--°</p>
-                                <p class="text-gray-500 text-sm" id="feels-like">Feels like --°</p>
-                            </div>
+                <div class="flex flex-col md:flex-row items-center justify-between">
+                    <div class="flex items-center mb-4 md:mb-0">
+                        <div id="weather-icon" class="text-5xl md:text-7xl mr-3 md:mr-4">--</div>
+                        <div>
+                            <p class="text-4xl md:text-5xl font-bold" id="current-temp">--°</p>
+                            <p class="text-gray-500 text-sm md:text-base" id="feels-like">Feels like --°</p>
                         </div>
-                        <button id="favorite-btn" class="p-2 rounded-full hover:bg-gray-200 transition-colors">
-                            <i class="ph ph-star"></i>
-                        </button>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3 w-full">
-                        <div class="weather-stat bg-gray-100 p-2 rounded-lg">
-                            <p class="flex items-center text-xs text-gray-500 mb-1">
+                    <div class="grid grid-cols-2 gap-3 md:gap-4 w-full md:w-auto">
+                        <div class="bg-gray-100 p-2 md:p-3 rounded-lg">
+                            <p class="flex items-center text-xs md:text-sm text-gray-500 mb-1">
                                 <i class="ph ph-drop mr-1"></i> Humidity
                             </p>
-                            <p class="font-medium text-sm" id="humidity">--%</p>
+                            <p class="font-medium text-sm md:text-base" id="humidity">--%</p>
                         </div>
-                        <div class="weather-stat bg-gray-100 p-2 rounded-lg">
-                            <p class="flex items-center text-xs text-gray-500 mb-1">
+                        <div class="bg-gray-100 p-2 md:p-3 rounded-lg">
+                            <p class="flex items-center text-xs md:text-sm text-gray-500 mb-1">
                                 <i class="ph ph-wind mr-1"></i> Wind
                             </p>
-                            <p class="font-medium text-sm" id="wind-speed">-- km/h</p>
+                            <p class="font-medium text-sm md:text-base" id="wind-speed">-- km/h</p>
                         </div>
-                        <div class="weather-stat bg-gray-100 p-2 rounded-lg">
-                            <p class="flex items-center text-xs text-gray-500 mb-1">
+                        <div class="bg-gray-100 p-2 md:p-3 rounded-lg">
+                            <p class="flex items-center text-xs md:text-sm text-gray-500 mb-1">
                                 <i class="ph ph-eye mr-1"></i> Visibility
                             </p>
-                            <p class="font-medium text-sm" id="visibility">-- km</p>
+                            <p class="font-medium text-sm md:text-base" id="visibility">-- km</p>
                         </div>
-                        <div class="weather-stat bg-gray-100 p-2 rounded-lg">
-                            <p class="flex items-center text-xs text-gray-500 mb-1">
+                        <div class="bg-gray-100 p-2 md:p-3 rounded-lg">
+                            <p class="flex items-center text-xs md:text-sm text-gray-500 mb-1">
                                 <i class="ph ph-gauge mr-1"></i> Pressure
                             </p>
-                            <p class="font-medium text-sm" id="pressure">-- mb</p>
+                            <p class="font-medium text-sm md:text-base" id="pressure">-- mb</p>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Forecast Section -->
-        <section id="forecast-section" class="mb-6 hidden">
-            <h3 class="text-lg font-bold mb-3 flex items-center">
+        <!-- 5-Day Forecast Section -->
+        <section id="forecast-section" class="mb-6 md:mb-8 hidden">
+            <h3 class="text-lg md:text-xl font-bold mb-3 md:mb-4 flex items-center">
                 <i class="ph ph-calendar-blank mr-2 text-blue-500"></i> 5-Day Forecast
             </h3>
             <div class="overflow-x-auto pb-2">
-                <div id="forecast-container" class="flex space-x-3 w-max"></div>
+                <div id="forecast-container" class="flex space-x-3 md:space-x-4 w-max"></div>
             </div>
         </section>
 
         <!-- Loading State -->
-        <div id="loading" class="hidden flex flex-col items-center justify-center py-8">
-            <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mb-3"></div>
-            <p class="text-sm">Loading weather data...</p>
+        <div id="loading" class="hidden flex flex-col items-center justify-center py-8 md:py-12">
+            <div class="animate-spin rounded-full h-10 md:h-12 w-10 md:w-12 border-t-2 border-b-2 border-blue-500 mb-3 md:mb-4"></div>
+            <p class="text-sm md:text-base">Loading weather data...</p>
         </div>
 
         <!-- Error State -->
-        <div id="error" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-3 rounded-lg mb-6">
-            <p id="error-message" class="text-sm"></p>
+        <div id="error" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-3 md:p-4 rounded-lg mb-6 md:mb-8">
+            <p id="error-message" class="text-sm md:text-base"></p>
         </div>
 
         <!-- Favorites Section -->
-        <section id="favorites-section" class="mb-6 hidden">
-            <h3 class="text-lg font-bold mb-3 flex items-center">
+        <section id="favorites-section" class="mb-6 md:mb-8 hidden">
+            <h3 class="text-lg md:text-xl font-bold mb-3 md:mb-4 flex items-center">
                 <i class="ph ph-star mr-2 text-yellow-500"></i> Favorite Locations
             </h3>
-            <div id="favorites-container" class="grid grid-cols-1 gap-3"></div>
+            <div id="favorites-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4"></div>
         </section>
     </div>
+
+    <!-- Share Button -->
+    <button id="share-btn" class="fixed bottom-4 right-4 md:bottom-6 md:right-6 bg-blue-500 hover:bg-blue-600 text-white p-3 md:p-4 rounded-full shadow-lg transition-all transform hover:scale-110">
+        <i class="ph ph-share-network"></i>
+    </button>
+
+    <!-- Share Modal -->
+    <div id="share-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-4 md:p-6 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-3 md:mb-4">
+                <h3 class="text-lg md:text-xl font-bold">Share Weather</h3>
+                <button id="close-share-modal" class="text-gray-500 hover:text-gray-700">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <div class="flex space-x-2 mb-3 md:mb-4">
+                <input type="text" id="share-link" class="flex-grow p-2 border border-gray-300 rounded-l text-sm md:text-base" readonly>
+                <button id="copy-link" class="bg-blue-500 hover:bg-blue-600 text-white px-3 md:px-4 rounded-r transition-colors text-sm md:text-base">Copy</button>
+            </div>
+            <div class="flex justify-center space-x-3 md:space-x-4">
+                <button class="social-share bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors">
+                    <i class="ph ph-facebook-logo text-lg md:text-xl"></i>
+                </button>
+                <button class="social-share bg-blue-400 text-white p-2 rounded-full hover:bg-blue-500 transition-colors">
+                    <i class="ph ph-twitter-logo text-lg md:text-xl"></i>
+                </button>
+                <button class="social-share bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors">
+                    <i class="ph ph-envelope text-lg md:text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
-</html>
+    </html> 
