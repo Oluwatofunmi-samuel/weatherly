@@ -1,14 +1,25 @@
+
 body {
     font-family: 'Inter', sans-serif;
     transition: background 0.5s ease;
+    color: #1f2937;
 }
 
 .weather-card {
     background-color: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(5px);
-    color: #333;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
 }
 
+.weather-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px -1px rgba(0, 0, 0, 0.15);
+}
+
+/* Background Themes */
 .bg-sunny {
     background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
 }
@@ -26,7 +37,7 @@ body {
     color: white;
 }
 
-/* Night mode adjustments */
+/* Night Mode Adjustments */
 .bg-night .weather-card,
 .bg-night .weather-stat {
     background-color: rgba(0, 0, 0, 0.7);
@@ -37,26 +48,88 @@ body {
     color: #d1d5db !important;
 }
 
+/* Forecast Section */
 .forecast-card {
-    min-width: 80px;
+    min-width: 90px;
+    flex-shrink: 0;
     backdrop-filter: blur(2px);
+    transition: transform 0.2s ease;
 }
 
-@media (min-width: 640px) {
-    .forecast-card {
-        min-width: 100px;
-    }
+.forecast-card:hover {
+    transform: translateY(-3px);
 }
 
+#forecast-container {
+    scrollbar-width: thin;
+    scrollbar-color: #3b82f6 transparent;
+    padding-bottom: 8px;
+}
+
+#forecast-container::-webkit-scrollbar {
+    height: 6px;
+}
+
+#forecast-container::-webkit-scrollbar-thumb {
+    background: #3b82f6;
+    border-radius: 4px;
+}
+
+/* Loading Spinner */
 .animate-spin {
-    animation: spin 1s linear infinite;
+    animation: spin 1.5s linear infinite;
 }
 
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
 
-/* Better touch targets for mobile */
+/* Weather Stats Grid */
+.weather-stat {
+    background-color: rgba(243, 244, 246, 0.7);
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+}
+
+/* Responsive Design */
+@media (min-width: 640px) {
+    .forecast-card {
+        min-width: 110px;
+    }
+    
+    .weather-card {
+        padding: 2rem;
+    }
+    
+    #forecast-container {
+        padding-bottom: 12px;
+    }
+}
+
+/* Mobile Touch Targets */
 button, input, .weather-card {
     touch-action: manipulation;
-} 
+}
+
+/* Error State */
+#error {
+    background-color: rgba(254, 226, 226, 0.9);
+    border-left-width: 4px;
+    border-color: #ef4444;
+}
+
+/* Favorite Section */
+#favorites-container {
+    gap: 0.75rem;
+}
+
+/* Search Suggestions */
+#search-suggestions {
+    z-index: 50;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Night Mode Scrollbar */
+.bg-night ::-webkit-scrollbar-thumb {
+    background: #60a5fa;
+}
