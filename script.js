@@ -1,4 +1,3 @@
-// script.js
 document.addEventListener('DOMContentLoaded', function() {
     // DOM Elements
     const searchInput = document.getElementById('search-input');
@@ -160,16 +159,21 @@ document.addEventListener('DOMContentLoaded', function() {
         const now = new Date();
         
         forecastDays.forEach(day => {
-            const date = new Date(day.date);
-            const isCurrentDay = date.toDateString() === 
-                now.toLocaleDateString('en-US', { timeZone: timezone });
+            const date = new Date(day.date + 'T12:00:00'); // Midday in UTC to avoid timezone shift
+            const options = { timeZone: timezone };
             
+            // Get localized date components
+            const currentDate = now.toLocaleDateString('en-US', options);
+            const forecastDate = date.toLocaleDateString('en-US', options);
+            const isCurrentDay = currentDate === forecastDate;
+            
+            // Get current hour in location's timezone
             const currentHour = new Date().toLocaleString('en-US', {
                 hour: 'numeric',
                 hour12: false,
                 timeZone: timezone
             });
-            
+
             const isDay = isCurrentDay ? 
                 currentHour >= 6 && currentHour < 18 :
                 true;
@@ -177,8 +181,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const forecastCard = document.createElement('div');
             forecastCard.className = 'forecast-card weather-card p-3 rounded-lg shadow-md flex flex-col items-center transition-all hover:shadow-lg';
             forecastCard.innerHTML = `
-                <p class="font-medium text-sm">${date.toLocaleDateString('en-US', { weekday: 'short', timeZone: timezone })}</p>
-                <p class="text-xs text-gray-500 mb-1">${date.getDate()}/${date.getMonth() + 1}</p>
+                <p class="font-medium text-sm">${date.toLocaleDateString('en-US', { 
+                    weekday: 'short', 
+                    timeZone: timezone 
+                })}</p>
+                <p class="text-xs text-gray-500 mb-1">${date.toLocaleDateString('en-US', {
+                    month: 'numeric',
+                    day: 'numeric',
+                    timeZone: timezone
+                })}</p>
                 <div class="text-3xl my-1"><i class="ph ${getWeatherIcon(day.day.condition.code, isDay)}"></i></div>
                 <div class="flex justify-between w-full mt-1">
                     <span class="font-bold text-sm">${Math.round(day.day.maxtemp_c)}°</span>
@@ -390,4 +401,4 @@ document.addEventListener('DOMContentLoaded', function() {
         url.searchParams.set('location', location);
         navigator.clipboard.writeText(url.toString());
     }
-});
+}); 
