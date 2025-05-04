@@ -1,4 +1,3 @@
-// script.js
 document.addEventListener('DOMContentLoaded', function() {
     // DOM Elements
     const searchInput = document.getElementById('search-input');
@@ -11,14 +10,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const loading = document.getElementById('loading');
     const error = document.getElementById('error');
     const errorMessage = document.getElementById('error-message');
-    const shareBtn = document.getElementById('share-btn');
-    const shareModal = document.getElementById('share-modal');
-    const closeShareModal = document.getElementById('close-share-modal');
-    const shareLink = document.getElementById('share-link');
-    const copyLink = document.getElementById('copy-link');
+    const favoriteBtn = document.getElementById('favorite-btn');
     const favoritesSection = document.getElementById('favorites-section');
     const favoritesContainer = document.getElementById('favorites-container');
-    const favoriteBtn = document.createElement('button');
     
     // API Configuration
     const API_KEY = 'f04de2d4d631476b8d5103315252804';
@@ -37,11 +31,8 @@ document.addEventListener('DOMContentLoaded', function() {
             favoritesSection.classList.remove('hidden');
         }
 
-        // Check for location in URL
-        checkUrlForLocation();
-        
-        // Set up favorite button
-        setupFavoriteButton();
+        // Try to get user's location on load
+        getLocation();
     }
 
     // Event Listeners
@@ -66,9 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     locationBtn.addEventListener('click', getLocation);
-    shareBtn.addEventListener('click', showShareModal);
-    closeShareModal.addEventListener('click', () => shareModal.classList.add('hidden'));
-    copyLink.addEventListener('click', copyToClipboard);
+    favoriteBtn.addEventListener('click', toggleFavorite);
 
     // Weather Data Functions
     async function fetchWeather(location) {
@@ -107,9 +96,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Update background based on weather condition
             updateBackground(currentData.current.condition.code, currentData.current.is_day);
-            
-            // Update share link
-            updateShareLink(location);
             
             // Update favorite button state
             updateFavoriteButton();
@@ -197,14 +183,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const weatherIcon = getWeatherIcon(day.day.condition.code, 1); // Always use day icons for forecast
             
             const forecastCard = document.createElement('div');
-            forecastCard.className = 'forecast-card bg-white p-3 md:p-4 rounded-lg shadow-md flex flex-col items-center min-w-[100px] md:min-w-[120px] transition-all hover:shadow-lg';
+            forecastCard.className = 'forecast-card weather-card p-3 rounded-lg shadow-md flex flex-col items-center transition-all hover:shadow-lg';
             forecastCard.innerHTML = `
-                <p class="font-medium text-sm md:text-base">${dayName}</p>
-                <p class="text-xs md:text-sm text-gray-500 mb-1 md:mb-2">${date.getDate()}/${date.getMonth() + 1}</p>
-                <div class="text-3xl md:text-4xl my-1 md:my-2"><i class="ph ${weatherIcon}"></i></div>
-                <div class="flex justify-between w-full mt-1 md:mt-2">
-                    <span class="font-bold text-sm md:text-base">${Math.round(day.day.maxtemp_c)}°</span>
-                    <span class="text-gray-500 text-sm md:text-base">${Math.round(day.day.mintemp_c)}°</span>
+                <p class="font-medium text-sm">${dayName}</p>
+                <p class="text-xs text-gray-500 mb-1">${date.getDate()}/${date.getMonth() + 1}</p>
+                <div class="text-3xl my-1"><i class="ph ${weatherIcon}"></i></div>
+                <div class="flex justify-between w-full mt-1">
+                    <span class="font-bold text-sm">${Math.round(day.day.maxtemp_c)}°</span>
+                    <span class="text-gray-500 text-sm">${Math.round(day.day.mintemp_c)}°</span>
                 </div>
             `;
             
@@ -311,7 +297,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         suggestions.slice(0, 5).forEach(item => {
             const suggestionItem = document.createElement('div');
-            suggestionItem.className = 'p-2 md:p-3 hover:bg-gray-100 cursor-pointer flex items-center text-sm md:text-base';
+            suggestionItem.className = 'p-2 hover:bg-gray-100 cursor-pointer flex items-center text-sm';
             suggestionItem.innerHTML = `
                 <i class="ph ph-map-pin mr-2 text-blue-500"></i>
                 <span>${item.name}, ${item.country}</span>
@@ -330,13 +316,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const history = getSearchHistory();
         if (history.length > 0) {
             const historyHeader = document.createElement('div');
-            historyHeader.className = 'p-2 text-xs md:text-sm text-gray-500 border-t border-gray-200';
+            historyHeader.className = 'p-2 text-xs text-gray-500 border-t border-gray-200';
             historyHeader.textContent = 'Recent searches';
             searchSuggestions.appendChild(historyHeader);
             
             history.forEach(item => {
                 const historyItem = document.createElement('div');
-                historyItem.className = 'p-2 md:p-3 hover:bg-gray-100 cursor-pointer flex items-center text-sm md:text-base';
+                historyItem.className = 'p-2 hover:bg-gray-100 cursor-pointer flex items-center text-sm';
                 historyItem.innerHTML = `
                     <i class="ph ph-clock-counter-clockwise mr-2 text-gray-500"></i>
                     <span>${item}</span>
@@ -380,53 +366,7 @@ document.addEventListener('DOMContentLoaded', function() {
         error.classList.remove('hidden');
     }
 
-    // Share Functions
-    function showShareModal() {
-        if (navigator.share) {
-            navigator.share({
-                title: `Weather in ${currentLocation}`,
-                text: `Check out the current weather in ${currentLocation}`,
-                url: window.location.href
-            }).catch(err => {
-                console.log('Error sharing:', err);
-                showFallbackShareModal();
-            });
-        } else {
-            showFallbackShareModal();
-        }
-    }
-
-    function showFallbackShareModal() {
-        shareModal.classList.remove('hidden');
-    }
-
-    function updateShareLink(location) {
-        const url = new URL(window.location.href);
-        url.searchParams.set('location', location);
-        shareLink.value = url.toString();
-    }
-
-    function copyToClipboard() {
-        shareLink.select();
-        document.execCommand('copy');
-        
-        // Show feedback
-        const originalText = copyLink.textContent;
-        copyLink.textContent = 'Copied!';
-        setTimeout(() => {
-            copyLink.textContent = originalText;
-        }, 2000);
-    }
-
     // Favorites Functions
-    function setupFavoriteButton() {
-        favoriteBtn.className = 'absolute top-3 right-3 md:top-4 md:right-4 p-2 rounded-full hover:bg-gray-200 transition-colors';
-        favoriteBtn.innerHTML = '<i class="ph ph-star"></i>';
-        favoriteBtn.title = 'Add to favorites';
-        favoriteBtn.addEventListener('click', toggleFavorite);
-        weatherDisplay.appendChild(favoriteBtn);
-    }
-
     function updateFavoriteButton() {
         const isFavorite = favorites.some(fav => fav.location.toLowerCase() === currentLocation.toLowerCase());
         favoriteBtn.innerHTML = isFavorite ? '<i class="ph ph-star-fill text-yellow-500"></i>' : '<i class="ph ph-star"></i>';
@@ -469,10 +409,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         favorites.forEach(fav => {
             const favoriteCard = document.createElement('div');
-            favoriteCard.className = 'bg-white p-3 md:p-4 rounded-lg shadow-md hover:shadow-lg transition-all cursor-pointer';
+            favoriteCard.className = 'weather-card p-3 rounded-lg shadow-md hover:shadow-lg transition-all cursor-pointer';
             favoriteCard.innerHTML = `
                 <div class="flex justify-between items-center">
-                    <h4 class="font-medium text-sm md:text-base">${fav.location}</h4>
+                    <h4 class="font-medium text-sm">${fav.location}</h4>
                     <button class="text-yellow-500 hover:text-yellow-600">
                         <i class="ph ph-star-fill"></i>
                     </button>
@@ -515,17 +455,4 @@ document.addEventListener('DOMContentLoaded', function() {
     function getSearchHistory() {
         return JSON.parse(localStorage.getItem('weatherSearchHistory')) || [];
     }
-
-    function checkUrlForLocation() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const locationParam = urlParams.get('location');
-        
-        if (locationParam) {
-            searchInput.value = locationParam;
-            fetchWeather(locationParam);
-        } else {
-            // Try to get user's location if no location in URL
-            getLocation();
-        }
-    }
-}); 
+});
