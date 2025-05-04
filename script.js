@@ -175,28 +175,59 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function getWeatherIcon(code, isDay) {
-        const iconMap = {
-            1000: isDay ? 'ph-sun' : 'ph-moon',
-            1003: isDay ? 'ph-cloud-sun' : 'ph-cloud-moon',
-            1006: 'ph-cloud',
-            1009: 'ph-cloud',
-            1030: 'ph-cloud-fog',
-            1063: 'ph-cloud-rain',
-            1066: 'ph-snowflake',
-            1069: 'ph-cloud-snow',
-            1087: 'ph-cloud-lightning',
-            1135: 'ph-cloud-fog',
-            1180: 'ph-cloud-rain',
-            1186: 'ph-cloud-rain',
-            1195: 'ph-cloud-rain',
-            1204: 'ph-cloud-snow',
-            1210: 'ph-snowflake',
-            1222: 'ph-snowflake',
-            1276: 'ph-cloud-lightning'
-        };
-        return iconMap[code] || 'ph-question';
-    }
+function getWeatherIcon(code, isDay) {
+    const iconMap = {
+        1000: isDay ? 'ph-sun' : 'ph-moon', // Clear
+        1003: isDay ? 'ph-cloud-sun' : 'ph-cloud-moon', // Partly cloudy
+        1006: 'ph-cloud', // Cloudy
+        1009: 'ph-cloud', // Overcast
+        1030: 'ph-cloud-fog', // Mist
+        1063: 'ph-cloud-drizzle', // Patchy rain
+        1066: 'ph-snowflake', // Patchy snow
+        1069: 'ph-cloud-snow', // Sleet
+        1072: 'ph-cloud-drizzle', // Freezing drizzle
+        1087: 'ph-cloud-lightning', // Thundery outbreaks
+        1114: 'ph-snowflake', // Blowing snow
+        1117: 'ph-snowflake', // Blizzard
+        1135: 'ph-cloud-fog', // Fog
+        1147: 'ph-cloud-fog', // Freezing fog
+        1150: 'ph-cloud-drizzle', // Light drizzle
+        1153: 'ph-cloud-drizzle', // Moderate drizzle
+        1168: 'ph-cloud-drizzle', // Freezing drizzle
+        1171: 'ph-cloud-drizzle', // Heavy freezing drizzle
+        1180: 'ph-cloud-rain', // Light rain
+        1183: 'ph-cloud-rain', // Moderate rain
+        1186: 'ph-cloud-rain', // Heavy rain
+        1189: 'ph-cloud-rain', // Light rain shower
+        1192: 'ph-cloud-rain', // Moderate/heavy rain shower
+        1195: 'ph-cloud-rain', // Torrential rain
+        1198: 'ph-cloud-rain', // Light freezing rain
+        1201: 'ph-cloud-rain', // Moderate/heavy freezing rain
+        1204: 'ph-cloud-snow', // Light sleet
+        1207: 'ph-cloud-snow', // Moderate/heavy sleet
+        1210: 'ph-snowflake', // Light snow
+        1213: 'ph-snowflake', // Moderate snow
+        1216: 'ph-snowflake', // Heavy snow
+        1219: 'ph-snowflake', // Light snow showers
+        1222: 'ph-snowflake', // Moderate/heavy snow showers
+        1225: 'ph-snowflake', // Blowing snow
+        1237: 'ph-circle-dashed', // Ice pellets
+        1240: 'ph-cloud-drizzle', // Light rain
+        1243: 'ph-cloud-rain', // Moderate/heavy rain
+        1246: 'ph-cloud-rain', // Torrential rain
+        1249: 'ph-cloud-snow', // Light sleet showers
+        1252: 'ph-cloud-snow', // Moderate/heavy sleet showers
+        1255: 'ph-snowflake', // Light snow showers
+        1258: 'ph-snowflake', // Moderate/heavy snow showers
+        1261: 'ph-circle-dashed', // Light ice pellets
+        1264: 'ph-circle-dashed', // Moderate/heavy ice pellets
+        1273: 'ph-cloud-lightning', // Patchy light rain w/thunder
+        1276: 'ph-cloud-lightning', // Moderate/heavy rain w/thunder
+        1279: 'ph-cloud-lightning', // Patchy light snow w/thunder
+        1282: 'ph-cloud-lightning' // Moderate/heavy snow w/thunder
+    };
+    return iconMap[code] || 'ph-question';
+        }
 
     function updateBackground(weatherCode, isDay) {
         document.body.classList.remove('bg-sunny', 'bg-rainy', 'bg-cloudy', 'bg-night');
