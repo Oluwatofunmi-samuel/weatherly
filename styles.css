@@ -5,6 +5,7 @@ body {
 
 .weather-card {
     background-color: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(5px);
     color: #333;
 }
 
@@ -22,9 +23,10 @@ body {
 
 .bg-night {
     background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+    color: white;
 }
 
-/* Ensure text is readable on all backgrounds */
+/* Night mode adjustments */
 .bg-night .weather-card,
 .bg-night .weather-stat {
     background-color: rgba(0, 0, 0, 0.7);
@@ -37,6 +39,7 @@ body {
 
 .forecast-card {
     min-width: 80px;
+    backdrop-filter: blur(2px);
 }
 
 @media (min-width: 640px) {
@@ -51,4 +54,9 @@ body {
 
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+
+/* Better touch targets for mobile */
+button, input, .weather-card {
+    touch-action: manipulation;
 } 
