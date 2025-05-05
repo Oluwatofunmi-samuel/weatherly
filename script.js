@@ -75,8 +75,8 @@ document.addEventListener('DOMContentLoaded', function() {
             searchSuggestions.classList.add('hidden');
 
             const [currentResponse, forecastResponse] = await Promise.all([
-                fetch(`${BASE_URL}/current.json?key=${API_KEY}&q=${location}`),
-                fetch(`${BASE_URL}/forecast.json?key=${API_KEY}&q=${location}&days=5`)
+                fetch(`${BASE_URL}/current.json?key=${API_KEY}&q=${location}&dt=${Date.now()}`),
+                fetch(`${BASE_URL}/forecast.json?key=${API_KEY}&q=${location}&days=5&dt=${Date.now()}`)
             ]);
 
             const [currentData, forecastData] = await Promise.all([
@@ -87,6 +87,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (currentData.error || forecastData.error) {
                 throw new Error(currentData.error?.message || forecastData.error?.message);
             }
+
+            console.log('Forecast Data:', forecastData); // Debug log
 
             renderWeather(currentData, forecastData);
             currentLocation = location;
@@ -159,15 +161,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const now = new Date();
         
         forecastDays.forEach(day => {
-            const date = new Date(day.date + 'T12:00:00'); // Midday in UTC to avoid timezone shift
+            const date = new Date(day.date + 'T12:00:00');
             const options = { timeZone: timezone };
             
-            // Get localized date components
             const currentDate = now.toLocaleDateString('en-US', options);
             const forecastDate = date.toLocaleDateString('en-US', options);
             const isCurrentDay = currentDate === forecastDate;
             
-            // Get current hour in location's timezone
             const currentHour = new Date().toLocaleString('en-US', {
                 hour: 'numeric',
                 hour12: false,
@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function getWeatherIcon(code, isDay) {
+   function getWeatherIcon(code, isDay) {
         const iconMap = {
             1000: isDay ? 'ph-sun' : 'ph-moon',
             1003: isDay ? 'ph-cloud-sun' : 'ph-cloud-moon',
